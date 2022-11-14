@@ -1,0 +1,23 @@
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
+WORKDIR /src
+COPY ["Project/DNCD.Project.Portal/DNCD.Project.Portal.csproj", "Project/DNCD.Project.Portal/"]
+COPY ["Services/API/DNCD.Services.API.Proxy/DNCD.Services.API.Proxy.csproj", "Services/API/DNCD.Services.API.Proxy/"]
+COPY ["Common/DNCD.Common.Base/DNCD.Common.Base.csproj", "Common/DNCD.Common.Base/"]
+RUN dotnet restore "Project/DNCD.Project.Portal/DNCD.Project.Portal.csproj"
+COPY . .
+WORKDIR "/src/Project/DNCD.Project.Portal"
+RUN dotnet build "DNCD.Project.Portal.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "DNCD.Project.Portal.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "DNCD.Project.Portal.dll"]

@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  main-api-staging:
+    build:
+      context: ./
+      dockerfile: Services/API/DNCD.Service.API/Dockerfile
+    ports:
+      - "1111:80"
+    networks:
+      - demo-mynetwork
+    environment:
+      ASPNETCORE_ENVIRONMENT: Staging
+  main-mvc-staging:
+    build:
+      context: ./
+      dockerfile: Project/DNCD.Project.Portal/Dockerfile
+    ports:
+      - "1112:80"
+    networks:
+      - demo-mynetwork
+    environment:
+      ASPNETCORE_ENVIRONMENT: Staging
+networks:
+  demo-mynetwork:
+    driver: bridge
